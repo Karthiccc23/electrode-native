@@ -4,7 +4,8 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.4'
+        classpath 'com.android.tools.build:gradle:{{{androidGradlePlugin}}}'
+        classpath 'com.facebook.react:react-native-gradle-plugin:{{{reactNativeGradlePlugin}}}'
     }
 }
 

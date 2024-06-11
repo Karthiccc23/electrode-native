@@ -69,7 +69,6 @@ export default class AndroidGenerator implements ContainerGenerator {
   ): Promise<ContainerGenResult> {
     return generateContainer(config, {
       fillContainerHull: this.fillContainerHull.bind(this),
-      postBundle: this.postBundle.bind(this),
     });
   }
 
@@ -351,7 +350,7 @@ You should replace "${annotationProcessorPrefix}:${dependency}" with "annotation
     mustacheView.customPermissions = _.uniq(mustacheView.customPermissions);
 
     androidDependencies.raw.push(
-      `api 'com.walmartlabs.ern:react-native:${versions.reactNativeAarVersion}'`,
+      `api 'com.walmartlabs.ern:react-android:${versions.reactNativeAarVersion}'`,
     );
 
     if (isKotlinEnabled) {
@@ -449,44 +448,6 @@ You should replace "${annotationProcessorPrefix}:${dependency}" with "annotation
 
     for (const perform of replacements) {
       perform();
-    }
-
-    if (semver.gte(reactNativePlugin.version, '0.60.0')) {
-      this.getJavaScriptEngine(config) === JavaScriptEngine.JSC
-        ? await kax
-            .task('Injecting JavaScript engine [JavaScriptCore]')
-            .run(
-              this.injectJavaScriptCoreEngine(
-                config,
-                reactNativePlugin.version,
-              ),
-            )
-        : await kax
-            .task('Injecting JavaScript engine [Hermes]')
-            .run(this.injectHermesEngine(config, reactNativePlugin.version));
-    }
-  }
-
-  public async postBundle(
-    config: ContainerGeneratorConfig,
-    bundle: BundlingResult,
-    reactNativeVersion: string,
-  ) {
-    if (this.getJavaScriptEngine(config) === JavaScriptEngine.HERMES) {
-      const hermesVersion =
-        config.androidConfig.hermesVersion ||
-        android.getDefaultHermesVersion(reactNativeVersion);
-      const hermesCli = await kax
-        .task(`Installing hermes-engine@${hermesVersion}`)
-        .run(HermesCli.fromVersion(hermesVersion));
-      await kax.task('Compiling JS bundle to Hermes bytecode').run(
-        hermesCli.compileReleaseBundle({
-          bundleSourceMapPath: bundle.sourceMapPath,
-          compositePath: config.composite.path,
-          jsBundlePath: bundle.bundlePath,
-        }),
-      );
-      bundle.isHermesBundle = true;
     }
   }
 
